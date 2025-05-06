@@ -1,37 +1,37 @@
 {
     "name": "Painel de Atendimento",
     "short_name": "Painel",
-    "start_url": "https://gabrielcastelodev.github.io/ChamadaSenha/",
+    "start_url": "/ChamadaSenha/",
     "display": "fullscreen",
     "background_color": "#0c00af",
     "theme_color": "#0c00af",
     "description": "Painel de Atendimento para exibição em TVs.",
     "icons": [
         {
-            "src": "/icon-144x144.png",
+            "src": "/ChamadaSenha/icon-144x144.png",
             "sizes": "144x144",
             "type": "image/png"
         },
         {
-            "src": "/icon-192x192.png",
+            "src": "/ChamadaSenha/icon-192x192.png",
             "sizes": "192x192",
             "type": "image/png"
         },
         {
-            "src": "/icon-512x512.png",
+            "src": "/ChamadaSenha/icon-512x512.png",
             "sizes": "512x512",
             "type": "image/png"
         }
     ],
     "screenshots": [
         {
-            "src": "screenshot1.png",
+            "src": "/ChamadaSenha/screenshot1.png",
             "sizes": "1280x720",
             "type": "image/png",
             "form_factor": "wide"
         },
         {
-            "src": "screenshot2.png",
+            "src": "/ChamadaSenha/screenshot2.png",
             "sizes": "1920x1080",
             "type": "image/png"
         }

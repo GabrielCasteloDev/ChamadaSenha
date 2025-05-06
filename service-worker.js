@@ -1,10 +1,10 @@
 const CACHE_NAME = "painel-cache-v1";
 const urlsToCache = [
-  "https://gabrielcastelodev.github.io/ChamadaSenha/",
-  "/manifest.json",
-  "/chamada.mp3",
-  "/icon-192x192.png",
-  "/icon-512x512.png"
+  "/ChamadaSenha/", // Página inicial
+  "/ChamadaSenha/manifest.json", // Manifest
+  "/ChamadaSenha/chamada.mp3", // Som
+  "/ChamadaSenha/icon-192x192.png", // Ícone 192x192
+  "/ChamadaSenha/icon-512x512.png" // Ícone 512x512
 ];
 
 // Instala o Service Worker e adiciona arquivos ao cache
