@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistema de Chamada - Firebase</title>
+  <link rel="manifest" href="/manifest.json" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #0c00af, #5a5ba3);
+      color: white;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      margin: 10px;
+      padding: 15px 30px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background-color: #ffffff;
+      color: #4c56af;
+      font-weight: bold;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    .btn:hover {
+      background-color: #5175da;
+      transform: scale(1.05);
+    }
+
+    #app {
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .painel {
+      font-size: 2.5rem;
+      margin-top: 40px;
+      color: white;
+      background-color: rgba(0, 0, 0, 0.3);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    /* Animação de destaque */
+    .painel.animacao {
+      transform: scale(1.1);
+      opacity: 0.8;
+    }
+
+    .relogio {
+      font-size: 1.5rem;
+      margin-top: 20px;
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <h1>Sistema de Chamada</h1>
+
+  <div id="modo">
+    <button class="btn" onclick="escolherModo('comprador')" aria-label="Selecionar modo comprador">Modo Comprador</button>
+    <button class="btn" onclick="escolherModo('painel')" aria-label="Selecionar modo painel">Modo Painel</button>
+  </div>
+
+  <div id="app" style="display:none;"></div>
+
+  <!-- Adiciona o som de chamada -->
+  <audio id="somChamada" src="chamada.mp3" preload="auto"></audio>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    // Importa os módulos necessários do Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    // Configuração do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyB0qiEhE1JtkPxPQD9IyXRhVBU2O7M-dgI",
+      authDomain: "chamada-comprador.firebaseapp.com",
+      databaseURL: "https://chamada-comprador-default-rtdb.firebaseio.com",
+      projectId: "chamada-comprador",
+      storageBucket: "chamada-comprador.firebasestorage.app",
+      messagingSenderId: "313902933010",
+      appId: "1:313902933010:web:c4e302a3f5a027e11a64cb",
+      measurementId: "G-MHMYMMJBJG"
+    };
+
+    // Inicializa o Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Define as funções no escopo global
+    window.escolherModo = function escolherModo(modo) {
+      document.getElementById('modo').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+
+      if (modo === 'comprador') {
+        iniciarComprador();
+      } else {
+        iniciarPainel();
+      }
+    };
+
+    function iniciarComprador() {
+      const compradores = [
+        { nome: 'Comprador 1', sala: 1 },
+        { nome: 'Fabricio', sala: 2 },
+        { nome: 'Juares', sala: 3 },
+      ];
+
+      const container = document.getElementById('app');
+      container.innerHTML = '<h2>Modo Comprador</h2>';
+
+      compradores.forEach((c) => {
+        const btn = document.createElement('button');
+        btn.className = 'btn';
+        btn.textContent = `Chamar: ${c.nome} (Sala ${c.sala})`;
+        btn.setAttribute('aria-label', `Chamar ${c.nome} da sala ${c.sala}`);
+        btn.onclick = async () => {
+          try {
+            const chamada = {
+              nome: c.nome,
+              sala: c.sala,
+              timestamp: new Date().toISOString()
+            };
+            await set(ref(db, 'chamadaAtual'), chamada);
+          } catch (error) {
+            console.error("Erro ao registrar chamada:", error);
+            alert("Erro ao registrar chamada. Tente novamente.");
+          }
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function iniciarPainel() {
+      const container = document.getElementById('app');
+      container.innerHTML = `
+        <h2>Painel de Atendimento</h2>
+        <div class="painel" id="painelTexto">Aguardando chamada...</div>
+        <div class="relogio" id="relogio"></div>
+      `;
+
+      // Atualiza o relógio
+      setInterval(() => {
+        const agora = new Date();
+        const horas = agora.getHours().toString().padStart(2, '0');
+        const minutos = agora.getMinutes().toString().padStart(2, '0');
+        const segundos = agora.getSeconds().toString().padStart(2, '0');
+        document.getElementById('relogio').textContent = `Hora atual: ${horas}:${minutos}:${segundos}`;
+      }, 1000);
+
+      try {
+        const chamadaRef = ref(db, 'chamadaAtual');
+        let ultimaChamada = null;
+
+        onValue(chamadaRef, (snapshot) => {
+          const chamada = snapshot.val();
+          const painel = document.getElementById('painelTexto');
+
+          if (chamada) {
+            painel.textContent = `Chamando: ${chamada.nome} - Sala ${chamada.sala}`;
+
+            // Toca o som e aplica a animação apenas se a chamada for diferente da última
+            if (ultimaChamada !== chamada.timestamp) {
+              const somChamada = document.getElementById('somChamada');
+              somChamada.play();
+
+              // Adiciona a classe de animação
+              painel.classList.add('animacao');
+
+              // Remove a classe de animação após 300ms
+              setTimeout(() => {
+                painel.classList.remove('animacao');
+              }, 300);
+
+              ultimaChamada = chamada.timestamp;
+            }
+          } else {
+            painel.textContent = "Aguardando chamada...";
+          }
+        });
+      } catch (error) {
+        console.error("Erro ao atualizar o painel:", error);
+        alert("Erro ao carregar o painel. Tente novamente.");
+      }
+    }
+  </script>
+
+  <!-- Registra o Service Worker -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register("/service-worker.js")
+        .then(() => console.log("Service Worker registrado com sucesso."))
+        .catch((error) => console.error("Erro ao registrar o Service Worker:", error));
+    }
+  </script>
+</body>
+</html>
