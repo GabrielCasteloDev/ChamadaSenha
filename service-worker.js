@@ -1,6 +1,6 @@
 const CACHE_NAME = "painel-cache-v1";
 const urlsToCache = [
-  "/index.html",
+  "https://gabrielcastelodev.github.io/ChamadaSenha/",
   "/manifest.json",
   "/chamada.mp3",
   "/icon-192x192.png",

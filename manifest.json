@@ -1,7 +1,7 @@
 {
     "name": "Painel de Atendimento",
     "short_name": "Painel",
-    "start_url": "/index.html",
+    "start_url": "https://gabrielcastelodev.github.io/ChamadaSenha/",
     "display": "fullscreen",
     "background_color": "#0c00af",
     "theme_color": "#0c00af",
