@@ -67,7 +67,7 @@
       compradores.forEach((c) => {
         const btn = document.createElement('button');
         btn.className = 'btn1';
-        btn.textContent = `Chamar: ${c.nome} (Sala ${c.sala})`;
+        btn.textContent = `${c.nome} (Sala ${c.sala})`;
         btn.setAttribute('aria-label', `Chamar ${c.nome} da sala ${c.sala}`);
         btn.onclick = async () => {
           try {
