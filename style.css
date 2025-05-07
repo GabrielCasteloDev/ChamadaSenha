@@ -1,0 +1,92 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #00063d, #001cb8);
+    color: white;
+    text-align: center;
+  }
+
+  h1 {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .btn {
+    padding: 25px 50px;
+    margin: 10px;
+    font-size: 2.4rem;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #ffffff;
+    color: #00063d;
+    font-weight: bold;
+    transition: background-color 0.3s, transform 0.1s;
+  }
+
+  .btn1 {
+    width: 45%;
+    height: 10vw;
+    margin: 10px;
+    font-size: 2.4rem;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #ffffff;
+    color: #00063d;
+    font-weight: bold;
+    transition: background-color 0.3s, transform 0.1s;
+  }
+
+  .btn:active {
+    background-color: #727272;
+    transform: scale(0.90);
+  }
+
+  #app {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .painel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffffff;
+    color: rgb(0, 0, 0);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+    text-transform: uppercase;
+    font-size: 3.5rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    width: 80%;
+    max-width: 900px;
+    margin-left: 40px;
+  }
+
+  /* Animação de destaque */
+  .painel.animacao {
+    transform: scale(1.1);
+    opacity: 0.9;
+  }
+
+  .relogio {
+    font-size: 2rem;
+    margin-top: 20px;
+    color: #ffffff;
+  }

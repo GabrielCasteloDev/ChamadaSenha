@@ -5,78 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sistema de Chamada - Firebase</title>
   <link rel="manifest" href="/ChamadaSenha/manifest.json" />
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background-color: #003b8b;
-      color: white;
-      text-align: center;
-    }
-
-    h1 {
-      font-size: 4rem;
-      margin-bottom: 20px;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-    }
-
-    .btn {
-      margin: 10px;
-      padding: 15px 30px;
-      font-size: 1.5rem;
-      cursor: pointer;
-      border: none;
-      border-radius: 5px;
-      background-color: #ffffff;
-      color: #00063d;
-      font-weight: bold;
-      transition: background-color 0.3s, transform 0.2s;
-    }
-
-    .btn:hover {
-      background-color: #5175da;
-      transform: scale(1.05);
-    }
-
-    #app {
-      width: 100%;
-      max-width: 800px;
-    }
-
-    .painel {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background-color: #ffffff;
-      color: #003366;
-      padding: 20px;
-      border-radius: 15px;
-      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
-      text-transform: uppercase;
-      font-size: 5rem;
-      font-weight: bold;
-      letter-spacing: 2px;
-      width: 80%;
-      max-width: 600px;
-    }
-
-    .relogio {
-      font-size: 2rem;
-      margin-top: 20px;
-      color: #ffffff;
-    }
-  </style>
+  <link href="./style.css?v=1.0" rel="stylesheet" type="text/css" />
 </head>
 <body>
-  <h1>Sistema de Chamada</h1>
+
 
   <div id="modo">
     <button class="btn" onclick="escolherModo('comprador')" aria-label="Selecionar modo comprador">Modo Comprador</button>
@@ -134,7 +66,7 @@
 
       compradores.forEach((c) => {
         const btn = document.createElement('button');
-        btn.className = 'btn';
+        btn.className = 'btn1';
         btn.textContent = `Chamar: ${c.nome} (Sala ${c.sala})`;
         btn.setAttribute('aria-label', `Chamar ${c.nome} da sala ${c.sala}`);
         btn.onclick = async () => {
