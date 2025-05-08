@@ -106,28 +106,30 @@
       try {
         const chamadaRef = ref(db, 'chamadaAtual');
         let ultimaChamada = null;
+        let tempoUltimaChamada = 0;
 
         onValue(chamadaRef, (snapshot) => {
           const chamada = snapshot.val();
           const painel = document.getElementById('painelTexto');
+          const agora = Date.now();
 
           if (chamada) {
-            painel.innerHTML = `Chamando:<br>${chamada.nome} - Sala ${chamada.sala}`;
+            // Verifica se o timestamp mudou e se passou pelo menos 5 segundos desde a última chamada
+            if (ultimaChamada !== chamada.timestamp && agora - tempoUltimaChamada > 10000) {
+              painel.innerHTML = `Chamando:<br>${chamada.nome} - Sala ${chamada.sala}`;
 
-            // Toca o som e aplica a animação apenas se a chamada for diferente da última
-            if (ultimaChamada !== chamada.timestamp) {
+              // Toca o som e aplica a animação
               const somChamada = document.getElementById('somChamada');
               somChamada.play();
 
-              // Adiciona a classe de animação
               painel.classList.add('animacao');
-
-              // Remove a classe de animação após 300ms
               setTimeout(() => {
                 painel.classList.remove('animacao');
               }, 300);
 
+              // Atualiza os controles
               ultimaChamada = chamada.timestamp;
+              tempoUltimaChamada = agora;
             }
           } else {
             painel.textContent = "Aguardando chamada...";
