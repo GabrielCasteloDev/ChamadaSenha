@@ -112,7 +112,7 @@
           const painel = document.getElementById('painelTexto');
 
           if (chamada) {
-            painel.textContent = `Chamando: ${chamada.nome} - Sala ${chamada.sala}`;
+            painel.innerHTML = `Chamando:<br>${chamada.nome} - Sala ${chamada.sala}`;
 
             // Toca o som e aplica a animação apenas se a chamada for diferente da última
             if (ultimaChamada !== chamada.timestamp) {
