@@ -90,7 +90,7 @@
       const container = document.getElementById('app');
       container.innerHTML = `
         <h2>Painel de Atendimento</h2>
-        <div class="painel" id="painelTexto">Aguardando chamada...</div>
+        <div class="painel" id="painelTexto">CARREGANDO...</div>
         <div class="relogio" id="relogio"></div>
       `;
 
@@ -106,33 +106,30 @@
       try {
         const chamadaRef = ref(db, 'chamadaAtual');
         let ultimaChamada = null;
-        let tempoUltimaChamada = 0;
 
         onValue(chamadaRef, (snapshot) => {
           const chamada = snapshot.val();
           const painel = document.getElementById('painelTexto');
-          const agora = Date.now();
 
           if (chamada) {
-            // Verifica se o timestamp mudou e se passou pelo menos 5 segundos desde a última chamada
-            if (ultimaChamada !== chamada.timestamp && agora - tempoUltimaChamada > 10000) {
+            // Verifica se o timestamp mudou
+            if (ultimaChamada !== chamada.timestamp) {
               painel.innerHTML = `Chamando:<br>${chamada.nome} - Sala ${chamada.sala}`;
 
-              // Toca o som e aplica a animação
+              // Toca o som
               const somChamada = document.getElementById('somChamada');
               somChamada.play();
 
-              painel.classList.add('animacao');
+              // Exibe o chamado por 10 segundos
               setTimeout(() => {
-                painel.classList.remove('animacao');
-              }, 300);
+                painel.innerHTML = ""; // Volta para "AGUARDE" após 10 segundos
+              }, 10000);
 
-              // Atualiza os controles
+              // Atualiza o último timestamp
               ultimaChamada = chamada.timestamp;
-              tempoUltimaChamada = agora;
             }
           } else {
-            painel.textContent = "Aguardando chamada...";
+            painel.innerHTML = ""; // Exibe "AGUARDE" se não houver chamada
           }
         });
       } catch (error) {
