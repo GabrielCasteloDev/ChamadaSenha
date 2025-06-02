@@ -4,146 +4,219 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sistema de Chamada - Firebase</title>
-  <link rel="manifest" href="/ChamadaSenha/manifest.json" />
+  <link rel="manifest" href="./manifest.json" />
   <link href="./style.css?v=1.0" rel="stylesheet" type="text/css" />
 </head>
 <body>
 
-
   <div id="modo">
-    <button class="btn" onclick="escolherModo('comprador')" aria-label="Selecionar modo comprador">Modo Comprador</button>
+    <button class="btn" onclick="escolherModo('comprador')" aria-label="Selecionar modo comprador">Modo Atendente</button>
     <button class="btn" onclick="escolherModo('painel')" aria-label="Selecionar modo painel">Modo Painel</button>
   </div>
 
   <div id="app" style="display:none;"></div>
 
-  <!-- Adiciona o som de chamada -->
   <audio id="somChamada" src="chamada.mp3" preload="auto"></audio>
 
-  <!-- Firebase SDK -->
   <script type="module">
-    // Importa os módulos necessários do Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-    // Configuração do Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyB0qiEhE1JtkPxPQD9IyXRhVBU2O7M-dgI",
-      authDomain: "chamada-comprador.firebaseapp.com",
-      databaseURL: "https://chamada-comprador-default-rtdb.firebaseio.com",
-      projectId: "chamada-comprador",
-      storageBucket: "chamada-comprador.firebasestorage.app",
-      messagingSenderId: "313902933010",
-      appId: "1:313902933010:web:c4e302a3f5a027e11a64cb",
-      measurementId: "G-MHMYMMJBJG"
-    };
+    window.addEventListener('DOMContentLoaded', () => {
 
-    // Inicializa o Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+      const firebaseConfig = {
+        apiKey: "AIzaSyB0qiEhE1JtkPxPQD9IyXRhVBU2O7M-dgI",
+        authDomain: "chamada-comprador.firebaseapp.com",
+        databaseURL: "https://chamada-comprador-default-rtdb.firebaseio.com",
+        projectId: "chamada-comprador",
+        storageBucket: "chamada-comprador.firebasestorage.app",
+        messagingSenderId: "313902933010",
+        appId: "1:313902933010:web:c4e302a3f5a027e11a64cb",
+        measurementId: "G-MHMYMMJBJG"
+      };
 
-    // Define as funções no escopo global
-    window.escolherModo = function escolherModo(modo) {
-      document.getElementById('modo').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
+      const app = initializeApp(firebaseConfig);
+      const db = getDatabase(app);
+      const auth = getAuth(app);
 
-      if (modo === 'comprador') {
-        iniciarComprador();
-      } else {
-        iniciarPainel();
+      window.escolherModo = function escolherModo(modo) {
+        document.getElementById('modo').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+
+        if (modo === 'painel') {
+          iniciarPainel();
+        } else {
+          iniciarLoginAtendente();
+        }
+      };
+
+      function iniciarLoginAtendente() {
+        const container = document.getElementById('app');
+        container.innerHTML = `
+          <h2>Login do Atendente</h2>
+          <input type="email" id="loginEmail" placeholder="Email" style="display: block; margin: 10px auto; padding: 8px; min-width: 200px;">
+          <input type="password" id="loginPassword" placeholder="Senha" style="display: block; margin: 10px auto; padding: 8px; min-width: 200px;">
+          <button class="btn" onclick="window.handleLogin()" aria-label="Fazer login">Entrar</button>
+          <p id="loginError" style="color: red; text-align: center; margin-top: 10px;"></p>
+        `;
       }
-    };
 
-    function iniciarComprador() {
-      const compradores = [
-        { nome: 'Rafael', sala: 1 },
-        { nome: 'Fabricio', sala: 2 },
-        { nome: 'Juares', sala: 3 },
-      ];
+      window.handleLogin = async function handleLogin() {
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        const errorElement = document.getElementById('loginError');
+        errorElement.textContent = '';
 
-      const container = document.getElementById('app');
-      container.innerHTML = '<h2>Modo Comprador</h2>';
+        if (!email || !password) {
+          errorElement.textContent = "Por favor, preencha email e senha.";
+          return;
+        }
 
-      compradores.forEach((c) => {
-        const btn = document.createElement('button');
-        btn.className = 'btn1';
-        btn.textContent = `${c.nome} (Sala ${c.sala})`;
-        btn.setAttribute('aria-label', `Chamar ${c.nome} da sala ${c.sala}`);
-        btn.onclick = async () => {
+        try {
+          const userCredential = await signInWithEmailAndPassword(auth, email, password);
+          console.log("Usuário logado com sucesso:", userCredential.user.email);
+
+          // ✅ Redireciona para tela de chamar senha imediatamente:
+          iniciarModoAtendenteLogado(userCredential.user);
+        } catch (error) {
+          console.error("Erro no login:", error);
+          let mensagemErro = "Erro no login. Por favor, tente novamente.";
+          if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+            mensagemErro = "Email ou senha incorretos.";
+          } else if (error.code === 'auth/invalid-email') {
+            mensagemErro = "Formato de email inválido.";
+          } else if (error.code === 'auth/too-many-requests') {
+            mensagemErro = "Muitas tentativas de login. Tente novamente mais tarde.";
+          }
+          errorElement.textContent = mensagemErro;
+        }
+      };
+
+      window.handleLogout = async function handleLogout() {
           try {
-            const chamada = {
-              nome: c.nome,
-              sala: c.sala,
-              timestamp: new Date().toISOString()
-            };
-            await set(ref(db, 'chamadaAtual'), chamada);
+              await signOut(auth);
+              console.log("Usuário fez logout.");
           } catch (error) {
-            console.error("Erro ao registrar chamada:", error);
-            alert("Erro ao registrar chamada. Tente novamente.");
+              console.error("Erro ao fazer logout:", error);
+              alert("Erro ao fazer logout. Tente novamente.");
           }
-        };
-        container.appendChild(btn);
-      });
-    }
+      };
 
-    function iniciarPainel() {
-      const container = document.getElementById('app');
-      container.innerHTML = `
-        <h2>Painel de Atendimento</h2>
-        <div class="painel" id="painelTexto">CARREGANDO...</div>
-        <div class="relogio" id="relogio"></div>
-      `;
-
-      // Atualiza o relógio
-      setInterval(() => {
-        const agora = new Date();
-        const horas = agora.getHours().toString().padStart(2, '0');
-        const minutos = agora.getMinutes().toString().padStart(2, '0');
-        const segundos = agora.getSeconds().toString().padStart(2, '0');
-        document.getElementById('relogio').textContent = `Hora atual: ${horas}:${minutos}:${segundos}`;
-      }, 1000);
-
-      try {
-        const chamadaRef = ref(db, 'chamadaAtual');
-        let ultimaChamada = null;
-
-        onValue(chamadaRef, (snapshot) => {
-          const chamada = snapshot.val();
-          const painel = document.getElementById('painelTexto');
-
-          if (chamada) {
-            // Verifica se o timestamp mudou
-            if (ultimaChamada !== chamada.timestamp) {
-              painel.innerHTML = `Chamando:<br>${chamada.nome} - Sala ${chamada.sala}`;
-
-              // Toca o som
-              const somChamada = document.getElementById('somChamada');
-              somChamada.play();
-
-              // Exibe o chamado por 10 segundos
-              setTimeout(() => {
-                painel.innerHTML = ""; // Volta para "AGUARDE" após 10 segundos
-              }, 10000);
-
-              // Atualiza o último timestamp
-              ultimaChamada = chamada.timestamp;
+      onAuthStateChanged(auth, (user) => {
+        const appContainer = document.getElementById('app');
+        if (appContainer && appContainer.style.display === 'block') {
+          const isInPainelMode = appContainer.innerHTML.includes('<h2>Painel de Atendimento</h2>');
+          if (!isInPainelMode) {
+            if (user) {
+              iniciarModoAtendenteLogado(user);
+            } else {
+              iniciarLoginAtendente();
             }
-          } else {
-            painel.innerHTML = ""; // Exibe "AGUARDE" se não houver chamada
           }
+        }
+      });
+
+      function iniciarModoAtendenteLogado(user) {
+        const compradores = [
+          { nome: 'Rafael', sala: 1 },
+          { nome: 'Fabricio', sala: 2 },
+          { nome: 'Juares', sala: 3 },
+        ];
+
+        const container = document.getElementById('app');
+        container.innerHTML = `
+          <h2>Modo Atendente</h2>
+          <p>Logado como: <strong>${user.email}</strong></p>
+          <button class="btn" onclick="window.handleLogout()" aria-label="Sair">Sair</button>
+          <hr>
+          <h3>Chamar Comprador:</h3>
+        `;
+
+        compradores.forEach((c) => {
+          const btn = document.createElement('button');
+          btn.className = 'btn1';
+          btn.textContent = `${c.nome} (Sala ${c.sala})`;
+          btn.setAttribute('aria-label', `Chamar ${c.nome} da sala ${c.sala}`);
+          btn.onclick = async () => {
+            try {
+              const chamada = {
+                nome: c.nome,
+                sala: c.sala,
+                timestamp: new Date().toISOString(),
+                chamadoPorUid: user.uid,
+                chamadoPorEmail: user.email
+              };
+              await set(ref(db, 'chamadaAtual'), chamada);
+              console.log(`Chamada registrada para ${c.nome}.`);
+            } catch (error) {
+              console.error("Erro ao registrar chamada:", error);
+              alert("Erro ao registrar chamada. Verifique se você está logado e tem permissão.");
+            }
+          };
+          container.appendChild(btn);
         });
-      } catch (error) {
-        console.error("Erro ao atualizar o painel:", error);
-        alert("Erro ao carregar o painel. Tente novamente.");
       }
-    }
+
+      function iniciarPainel() {
+        const container = document.getElementById('app');
+        container.innerHTML = `
+          <h2>Painel de Atendimento</h2>
+          <div class="painel" id="painelTexto">AGUARDANDO CHAMADA...</div>
+          <div class="relogio" id="relogio"></div>
+        `;
+
+        setInterval(() => {
+          const agora = new Date();
+          const horas = agora.getHours().toString().padStart(2, '0');
+          const minutos = agora.getMinutes().toString().padStart(2, '0');
+          const segundos = agora.getSeconds().toString().padStart(2, '0');
+          document.getElementById('relogio').textContent = `Hora atual: ${horas}:${minutos}:${segundos}`;
+        }, 1000);
+
+        try {
+          const chamadaRef = ref(db, 'chamadaAtual');
+          let ultimaChamadaTimestamp = null;
+
+          onValue(chamadaRef, (snapshot) => {
+            const chamada = snapshot.val();
+            const painel = document.getElementById('painelTexto');
+
+            if (chamada) {
+              if (ultimaChamadaTimestamp !== chamada.timestamp) {
+                painel.innerHTML = `Chamando:<br><strong class="nome-chamado">${chamada.nome}</strong><br>Sala ${chamada.sala}`;
+                const somChamada = document.getElementById('somChamada');
+                somChamada.currentTime = 0;
+                somChamada.play().catch(e => console.error("Erro ao tocar som:", e));
+
+                window.chamadaTimeout = setTimeout(() => {
+                  painel.innerHTML = "AGUARDANDO PRÓXIMA CHAMADA...";
+                  window.chamadaTimeout = null;
+                }, 10000);
+
+                ultimaChamadaTimestamp = chamada.timestamp;
+              }
+            } else {
+              painel.innerHTML = "AGUARDANDO PRIMEIRO CHAMADA...";
+              ultimaChamadaTimestamp = null;
+              if (window.chamadaTimeout) {
+                clearTimeout(window.chamadaTimeout);
+                window.chamadaTimeout = null;
+              }
+            }
+          });
+        } catch (error) {
+          console.error("Erro ao atualizar o painel:", error);
+          alert("Erro ao carregar o painel. Tente novamente.");
+        }
+      }
+    }); // fim DOMContentLoaded
   </script>
 
-  <!-- Registra o Service Worker -->
   <script>
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker
-        .register("/ChamadaSenha/service-worker.js")
+        .register("./service-worker.js")
         .then(() => console.log("Service Worker registrado com sucesso."))
         .catch((error) => console.error("Erro ao registrar o Service Worker:", error));
     }
